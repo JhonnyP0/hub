@@ -1,28 +1,88 @@
-{%extends "index.html"%}
+{% extends "index.html" %}
 
-{%block content%}
+{% block content %}
+
+
     <form class="credform" method="POST">
         {{ form.hidden_tag() }}
-        <div>
-            {{ form.score(placeholder="Score (1-5)") }}
-        </div>
-        <div>
-            {{ form.content(placeholder="Your Opinion") }}
-        </div>
-        <div>
-            {{ form.submit() }}
-        </div>
-</form>
+            <div class="filter-section" style="text-align: center; margin-bottom: 20px;">
+        <label for="project-filter" style="color: white;">Filter reviews:</label>
+        <select id="project-filter" class="ipt2" onchange="filterByProject(this.value)">
+            <option value="Hub" {% if current_p == 'Hub' %}selected{% endif %}>Hub</option>
+              <option value="WMS" {% if current_p == 'WMS' %}selected{% endif %}>WMS</option>
+            <option value="Flowly" {% if current_p == 'Flowly' %}selected{% endif %}>Flowly</option>
+            <option value="dJango Project" {% if current_p == 'dJango Project' %}selected{% endif %}>dJango Project</option>
+            <option value="FastAPI Project" {% if current_p == 'FastAPI Project' %}selected{% endif %}>FastAPI Project</option>
+        </select>
+    </div>
+        <div>{{ form.project(class="ipt2") }}</div> 
+        <div>{{ form.score(class="ipt2", placeholder="Score (1-5)") }}</div>
+        <div>{{ form.content(class="txtar2", placeholder="Your Opinion") }}</div>
+        <div>{{ form.submit(class="btt2") }}</div>
+    </form>
+
     <section id="reviews">
-        
+        <h2 style="color: white; text-align: center;">Reviews: {{ current_p }}</h2>
         {% for post in opinions %}
-            <div class="review">
-                <h3>Score: {{ post.opinion_score }}</h3>
-                <p>{{ post.content }}</p>
-                <small>By: {{ post.author.username }} on {{ post.created_at }}</small>
+            <div class="review" id="review-container-{{ post.id }}" >
+                <div id="display-{{ post.id }}">
+                    <h3>Score: {{ post.opinion_score }}</h3>
+                    <p>{{ post.content }}</p>
+                    <small>By: {{ post.author.username }} on {{ post.created_at }}</small>
+                    
+                    {% if current_user.is_authenticated and post.user_id == current_user.id %}
+                        <br>
+                        <div class="action-buttons">
+                            <button class="btt1" onclick="toggleEdit('{{ post.id }}')">Edit</button>
+                            
+                            <form action="{{ url_for('delete_opinion', post_id=post.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Na pewno chcesz usunąć tę opinię?');">
+                                {{ form.hidden_tag() }}
+                                <button class="btt1" style="color: red" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if current_user.is_authenticated and post.user_id == current_user.id %}
+                <div id="edit-form-{{ post.id }}" style="display: none;">
+                    <form action="{{ url_for('edit_opinion', post_id=post.id) }}" method="POST">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="project" value="{{ post.project_name }}">
+                        
+                        <input class="ipt2" type="number" name="score" value="{{ post.opinion_score }}" min="1" max="5" required>
+                        <textarea class="txtar2" name="content" required>{{ post.content }}</textarea>
+                        
+                        <div class="btn-group">
+                            <button class="btt2" type="submit">Save</button>
+                            <button class="btt2" type="button" onclick="toggleEdit('{{ post.id }}')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
             </div>
         {% else %}
-            <p>No reviews yet. Be the first to submit one!</p>
+            <p style="color: white; text-align: center;">No reviews for this project yet. Be the first!</p>
         {% endfor %}
     </section>
-{%endblock%}
+
+    <script>
+
+    function filterByProject(val) {
+        window.location.href = "{{ url_for('opinion') }}?p=" + encodeURIComponent(val);
+    }
+
+
+    function toggleEdit(postId) {
+        const displayDiv = document.getElementById(`display-${postId}`);
+        const editDiv = document.getElementById(`edit-form-${postId}`);
+        
+        if (editDiv.style.display === "none") {
+            editDiv.style.display = "block";
+            displayDiv.style.display = "none";
+        } else {
+            editDiv.style.display = "none";
+            displayDiv.style.display = "block";
+        }
+    }
+    </script>
+{% endblock %}

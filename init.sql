@@ -11,7 +11,8 @@ create table posts (
     id int auto_increment primary key,
     user_id int not null,
     content text not null,
-    opinion_score tinyint default 10,
+    opinion_score tinyint default 5,
+    project_name varchar(100) not null, 
     created_at timestamp default current_timestamp,
     foreign key (user_id) references users(id) on delete cascade
 );

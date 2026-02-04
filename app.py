@@ -1,4 +1,4 @@
-from flask import Flask, render_template,flash,redirect,url_for
+from flask import Flask, render_template,flash,redirect,url_for, request
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 from flask_login import LoginManager,login_user,login_required, current_user
@@ -15,7 +15,12 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.secret_key = os.getenv('API_KEY')
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+db_host=os.getenv('DB_HOST')
+
+if not os.path.exists('/.dockerenv'):
+    db_host='localhost'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@"f"{db_host}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 mail = Mail(app)
@@ -121,27 +126,68 @@ def confirm_email(token):
 def opinion():
     from source import ReviewForm, Post
     form = ReviewForm()
-    all_opinions=Post.query.all()
+
+    selected_project = request.args.get('p', 'Hub')
+    opinions_to_show = Post.query.filter_by(project_name=selected_project).all()
+
     if form.validate_on_submit():
-        new_post = Post(content=form.content.data, opinion_score=form.score.data, user_id=current_user.id)
-        try:
-            existing_post=Post.query.filter_by(user_id=current_user.id).first()
-            if existing_post:
-                flash('You have already submitted a review.', 'error')
-                return redirect(url_for('opinion'))
-            else:
-                db.session.add(new_post)
-                db.session.commit()
-                flash('Your review has been submitted successfully.', 'success')
-                msg = Message(f'Thank you for submitting your review with a score of {form.score.data}!',sender=app.config['MAIL_USERNAME'], recipients=[current_user.email])
-                msg.body = f'Dear {current_user.username},\n\nThank you for your valuable feedback!\n\nYour review: \n\n{form.content.data}\n\nYour opinion matters!\n\nBest regards,\nThe Team'
-                mail.send(msg)
-                return redirect(url_for('opinion'))
-        except:
-            flash('An error occurred while submitting your review. Please try again.', 'error')
-            db.session.rollback()
+
+        existing = Post.query.filter_by(
+            user_id=current_user.id, 
+            project_name=form.project.data
+        ).first()
+
+        if existing:
+            flash(f'Już oceniłeś projekt: {form.project.data}!', 'error')
+        else:
+            new_post = Post(
+                content=form.content.data,
+                opinion_score=form.score.data,
+                project_name=form.project.data,
+                user_id=current_user.id
+            )
+            db.session.add(new_post)
+            db.session.commit()
+            flash('Opinia dodana!', 'success')
+            return redirect(url_for('opinion', p=form.project.data))
     
-    return render_template('opinion.html', form=form, opinions=all_opinions)
+    return render_template('opinion.html', form=form, opinions=opinions_to_show, current_p=selected_project)
+
+@app.route('/edit_opinion/<int:post_id>', methods=['POST'])
+@login_required
+def edit_opinion(post_id):
+    from source import Post
+    post = Post.query.get_or_404(post_id)
+
+    from source import ReviewForm
+    form = ReviewForm()
+    
+    if form.validate_on_submit():
+        post.content = form.content.data
+        post.opinion_score = form.score.data
+        try:
+            db.session.commit()
+            flash('Your review has been updated.', 'success')
+        except:
+            db.session.rollback()
+            flash('Error ocured.', 'error')
+            
+    return redirect(url_for('opinion'))
+
+@app.route('/delete_opinion/<int:post_id>', methods=['POST'])
+@login_required
+def delete_opinion(post_id):
+    from source import Post
+    post = Post.query.get_or_404(post_id)
+    try:
+        db.session.delete(post)
+        db.session.commit()
+        flash('Your review has been deleted.', 'info')
+    except:
+        db.session.rollback()
+        flash('Error ocured.', 'error')
+
+    return redirect(url_for('opinion'))
 
 @app.route('/logout')
 @login_required

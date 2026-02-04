@@ -173,13 +173,13 @@ footer
     display: flex;
     flex-direction: column;
     gap: 1em;
-    width: 13em;
+    width: 14em;
     margin: 2em auto;
 }
 
 .credform input
 {
-    width: 100%;
+    width: 95%;
     padding: 0.5em;
     border-radius: var(--radius);
     border: none;
@@ -192,7 +192,7 @@ footer
 
 #submit
 {
-width: 108%;
+width: 103%;
 }
 
 #about-project
@@ -457,4 +457,70 @@ width: 108%;
         word-wrap: break-word;
         overflow-wrap: break-word;
     }
+}
+
+.txtar2, .btt2, .ipt2
+{
+    width: 100%;
+    padding: 0.5em;
+    margin-top: 0.5em;
+    border-radius: var(--radius);
+    border: none;
+    outline: none;
+    font-family: "Varela Round", sans-serif;
+    font-size: 14px;
+    background-color: #3b3b3b8b;
+    color:rgba(12, 239, 4, 0.68);
+}
+
+.btt1
+{
+    padding: 0.5em;
+    margin-top: 0.5em;
+    border-radius: var(--radius);
+    border: none;
+    outline: none;
+    font-family: "Varela Round", sans-serif;
+    font-size: 14px;
+    background-color: #3b3b3b8b;
+    color:rgba(12, 239, 4, 0.68);
+}
+
+#tempmail
+{
+    text-shadow: 0 0 10px rgba(12, 239, 4, 0.68);
+    font-size: 0.8em;
+}
+
+.input-with-icon {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative; /* Pozwala na pozycjonowanie ikonki względem tego pola */
+}
+
+.input-with-icon .ipt2 {
+    flex: 1; /* To sprawi, że input zajmie całą dostępną szerokość, identycznie jak pozostałe */
+}
+
+.help-icon {
+    position: absolute;
+    left: calc(100% + 10px); /* Wywala ikonkę 10px poza prawą krawędź inputa */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    background-color: #3b3b3b8b;
+    color: rgba(12, 239, 4, 0.8);
+    border: 1px solid rgba(12, 239, 4, 0.3);
+    border-radius: 5px; /* Kwadratowy z lekkim zaokrągleniem, jak na Twoim screenie */
+    font-size: 14px;
+    cursor: help;
+    transition: 0.3s;
+}
+
+.help-icon:hover {
+    border-color: rgba(12, 239, 4, 1);
+    box-shadow: 0 0 8px rgba(12, 239, 4, 0.3);
 }

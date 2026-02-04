@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField,IntegerField
+from wtforms import StringField, PasswordField, SubmitField,IntegerField,SelectField
 from wtforms.validators import DataRequired, Length, EqualTo, number_range
 from extend import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -25,7 +25,8 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     opinion_score = db.Column(db.Integer, default=10)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    
+    project_name = db.Column(db.String(100), nullable=False)
+
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     author = db.relationship('Users', backref=db.backref('posts', lazy=True))
@@ -43,6 +44,13 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('Register')
 
 class ReviewForm(FlaskForm):
+    project = SelectField('Project', choices=[
+        ('Hub', 'Hub'),
+        ('WMS', 'WMS'),
+        ('Flowly', 'Flowly'),
+        ('dJango Project', 'dJango Project'),
+        ('FastAPI Project', 'FastAPI Project')
+    ], validators=[DataRequired()])
     score = IntegerField('Score (1-5)', validators=[DataRequired(), number_range(min=1, max=5)])
     content = StringField('Your Opinion', validators=[DataRequired(), Length(min=10, max=500)])
     submit = SubmitField('Submit Review')
