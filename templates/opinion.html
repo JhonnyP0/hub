@@ -9,10 +9,9 @@
         <label for="project-filter" style="color: white;">Filter reviews:</label>
         <select id="project-filter" class="ipt2" onchange="filterByProject(this.value)">
             <option value="Hub" {% if current_p == 'Hub' %}selected{% endif %}>Hub</option>
-              <option value="WMS" {% if current_p == 'WMS' %}selected{% endif %}>WMS</option>
-            <option value="Flowly" {% if current_p == 'Flowly' %}selected{% endif %}>Flowly</option>
-            <option value="dJango Project" {% if current_p == 'dJango Project' %}selected{% endif %}>dJango Project</option>
-            <option value="FastAPI Project" {% if current_p == 'FastAPI Project' %}selected{% endif %}>FastAPI Project</option>
+            <option value="WMS" {% if current_p == 'WMS' %}selected{% endif %}>WMS</option>
+            <option value="Ecommerce" {% if current_p == 'Ecommerce' %}selected{% endif %}>Ecommerce</option>
+            <option value="TempMail" {% if current_p == 'TempMail' %}selected{% endif %}>TempMail</option>
         </select>
     </div>
         <div>{{ form.project(class="ipt2") }}</div> 

@@ -47,9 +47,8 @@ class ReviewForm(FlaskForm):
     project = SelectField('Project', choices=[
         ('Hub', 'Hub'),
         ('WMS', 'WMS'),
-        ('Flowly', 'Flowly'),
-        ('dJango Project', 'dJango Project'),
-        ('FastAPI Project', 'FastAPI Project')
+        ('Ecommerce', 'Ecommerce'),
+        ('TempMail', 'TempMail')
     ], validators=[DataRequired()])
     score = IntegerField('Score (1-5)', validators=[DataRequired(), number_range(min=1, max=5)])
     content = StringField('Your Opinion', validators=[DataRequired(), Length(min=10, max=500)])
